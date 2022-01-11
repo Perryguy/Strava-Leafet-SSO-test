@@ -6,6 +6,7 @@ var logger = require('morgan');
 var cors = require('cors')
 
 require("dotenv").config()
+require("express-session")
 require("./auth/Stravapassport")
 require("./auth/passport")
 var indexRouter = require('./routes/index');
@@ -13,14 +14,14 @@ var usersRouter = require('./routes/users');
 var testAPIRouter = require("./routes/testAPI");
 const loginWithStrava = require('./auth/loginWithStrava');
 const passport = require('passport');
-
+const session = require('express-session')
 var app = express();
-
+const middlewares = require("./middleware")
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
-
+app.use(session({ secret: 'melody hensley is my spirit animal' }));
 app.use(cors());
 app.use(passport.initialize())
 app.use(passport.session())
@@ -29,7 +30,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use("/testAPI", testAPIRouter);
@@ -50,4 +50,6 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
+app.use(middlewares.notFound);
+app.use(middlewares.errorHandler);
 module.exports = app;
